@@ -1,0 +1,64 @@
+.NET
+  ASP.NET
+  ADO.NET
+
+  ADO     =>Active Database Object
+  ADO.NET 
+      1) Baglantili Yontem (Connectionly)
+      2) Baglantisiz Yontem(Connectionless)
+
+      3) EF
+
+Entity Framework
+
+C# 3.0 => LINQ
+
+    * LINQ To Object
+    * LINQ To SQL(Sadece SQL Server...)
+    * LINQ To XML
+
+Data != Object
+
+ORM: Object-Relation Mapping
+Entity Framework, MS ORM aracıdır...
+
+LINQ To SQL => Entity Framework
+
+LINQ to SQL
+    -1 Database First
+    -2 Model First
+
+Entity Framework
+    -1 Database First
+    -2 Model First
+
+EF 4.0
+    - Code First
+      *** Database First
+      *** Model First 
+
+Hangi Yontemi neden tercih etmeliyiz?
+*** Hali hazırda bir Veritabanı varsa; DB first kullanmak gerekir
+*** Sıfır bir projeye başlayaacaksak 
+    Model First olabilir...
+    Database first olabilir... 
+
+    Migration kullanımı onemli...
+
+2016 => Core => Entity Framework Core
+  - Code First
+      *** Database First
+      *** Model First 
+
+// Hybernate - nHybernate
+
+
+//***Connection String Nedir?
+//Bir veritabanı sistemine bağlanabilmek için gerekli verilerin tutulduğu metin bilgisidir...
+
+
+EF CORE => Database First Yaklasımı...
+ ***Oncelikle gerekli olan kutuphaneleri yukle...(Nuget)
+  Microsoft.EntityFrameworkCore
+  Microsoft.EntityFrameworkCore.SqlServer
+  Microsoft.EntityFrameworkCore.Tools
