@@ -1,3 +1,6 @@
+//Önce aşağıda entity framework öncesi kullanılan bağlantılı yöntemi uyguladık.
+//Biz bu veriyi artık içeri aldığımızdan içeride de linq to object te öğrendiğimiz gibi sorgulamalar, flitrelemeler vs yapabiliriz.
+
 
 internal class Category
     {
@@ -5,13 +8,16 @@ internal class Category
         public string CategoryName { get; set; }
         public string Description { get; set; }
 
+        
+        //listbox ilgili satır kadar namespace ile doldu. Polymorphism uyguladık.
+
         public override string ToString()
         {
             return $"{CategoryID} {CategoryName} {Description}";
         }
     }
 
-//-------------------------------------------------------------------------------------------------------------------------------------
+//---------------------------------
 
 public partial class Form1 : Form
     {
@@ -25,11 +31,17 @@ public partial class Form1 : Form
             //Veritabanına bağlanmak için Connection String gerekli..
             SqlConnection conn = new SqlConnection("Data source=.;initial catalog=Northwind;integrated security=true;Trust Server Certificate=True");
 
+            //Benim macbook ConnectionString
+            //SqlConnection conn = new SqlConnection("Data source=MEHMETAYDIN57A1\\SQLEXPRESS;initial catalog=NORTHWND;integrated security=SSPI;User Id=sa;Password=123;Trust Server Certificate=True");
+
             //SqlConnection altını çizerse crtl+. ile install Microsotf.Data.SqlClient
             //Data source=. aktif olan sql server i seçer. Birden fazla server varsa açık olarak ismini yazmanız gerekiyor.
             //integrated security diyerek windows authotication ile bağlanacağımızı bildiriyoruz.
 
+            //Tools-Connect to database içerisinden de gerektiğinde connection string için faydalanabilirsin.
+
             conn.Open(); //Baglantiyi aç...
+
             //Yapılacak is...
             SqlCommand sqlCommand = new SqlCommand("SELECT * FROM Categories", conn);
 
@@ -93,3 +105,6 @@ public partial class Form1 : Form
     }
 
 //-----------------------------------------------------------------------------------------------------------------------
+
+
+
