@@ -19,6 +19,8 @@ C# 3.0 => LINQ
 
 Data != Object
 
+//Obje değerini insert cümlesine çevirerek göndermek?
+
 ORM: Object-Relation Mapping
 Entity Framework, MS ORM aracıdır...
 
