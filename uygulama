@@ -1,5 +1,6 @@
 //Önce aşağıda entity framework öncesi kullanılan bağlantılı yöntemi uyguladık.
 //Biz bu veriyi artık içeri aldığımızdan içeride de linq to object te öğrendiğimiz gibi sorgulamalar, flitrelemeler vs yapabiliriz.
+//Join sonucu gelebilecek bir sorgunun tablosu için ya class açılabilir ya da anonim tip uygulanabilir.
 
 
 internal class Category
@@ -55,6 +56,8 @@ public partial class Form1 : Form
             {
 
                 //Tabloda tutulan her satırı Category nesnesine cevir...
+                //GetString gibi id için GetInt kullanırsan converte gerek kalmaz.
+
                 Category category = new Category()
                 {
                     CategoryID = Convert.ToInt32(dr[0]),
@@ -71,40 +74,4 @@ public partial class Form1 : Form
             listBox1.DataSource = categories;
         }
 
-        private void btnProducts_Click(object sender, EventArgs e)
-        {
-            NorthwindContext context = new NorthwindContext();
-
-            // dataGridView1.DataSource = context.Products.ToList();
-
-            context.Categories.Add(new Models.Category { CategoryName = "yepyeni kat.", Description = "iste oyle.." });
-            // context.SaveChanges();
-
-
-            dataGridView1.DataSource = context.Categories.ToList();
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-
-
-            var kat = context.Categories.Find(10);
-            context.Categories.Remove(kat);
-            context.SaveChanges();
-        }
-        NorthwindContext context = new NorthwindContext();
-        private void button2_Click(object sender, EventArgs e)
-        {
-            dataGridView1.DataSource = context.Products.Include("Category").Select(x => new { x.ProductId, x.ProductName, x.Category.CategoryName }).ToList();
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
     }
-
-//-----------------------------------------------------------------------------------------------------------------------
-
-
-
