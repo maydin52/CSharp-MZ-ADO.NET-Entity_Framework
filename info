@@ -63,9 +63,63 @@ Hangi Yontemi neden tercih etmeliyiz?
 
 //MARS ayarlarını araştır.
 
+//--------------------------------------------------------------------------------------------------------
 
 EF CORE => Database First Yaklasımı...
+
  ***Oncelikle gerekli olan kutuphaneleri yukle...(Nuget)
-  Microsoft.EntityFrameworkCore
-  Microsoft.EntityFrameworkCore.SqlServer
-  Microsoft.EntityFrameworkCore.Tools
+  Tools - Nuget Package Manager - ..... for Solution seçilir, browse girilir ve aşağıdakiler sırayla yüklenir. Hepsinde version 6.0.020 yani aynı seçilir ve hepsinde install tıklanır.
+  Yüklenip yüklenmediğini Solution Explorer altındaki Dependencies altındaki Packages klasörü altından kontrol et.
+
+  1. Microsoft.EntityFrameworkCore
+  2. Microsoft.EntityFrameworkCore.SqlServer
+  3. Microsoft.EntityFrameworkCore.Tools
+
+Tools - Nuget Package Manager - Nuget Manager Console açılır. 
+>PM karşısına ; Scaffold DbContext "VS İÇİNE YAZDIĞIN CONNECTION STRING (TRUST DAHİL)" Microsoft.EntityFrameworkCore.SqlServer -o Models yazılır ve entere basılır. Sarı gelirse ok.
+
+Models klasörü içerisinde classlar oluştu.
+NorthwindContext class ına dikkat.
+DbSet lerde propertyleri tanımlamış.
+
+Microsoft.EntityFrameworkCore.SqlServer bu provider.
+-o Models ise oluşturacağı class ları Models klasörü oluştur ve içine at demek.
+
+//Bağlantılı yöntemdeki select, insert cümlesi yazmadık.
+
+
+Bağlantılı yöntemin olduğu solution içinde Form Class ına;
+
+// listelemek ve eklemek için;
+private void btnProducts_Click(object sender, EventArgs e)
+        {
+            NorthwindContext context = new NorthwindContext();
+      
+            // dataGridView1.DataSource = context.Products.ToList();
+            // Tüm tablo datagridview da görüntülendi.
+
+            // Mesela Categories tablosuna yenbir kategori eklemek istiyoruz.
+            // context.Categories.Add(new Models.Category { CategoryName = "yepyeni kat.", Description = "iste oyle.." });
+            // context.SaveChanges();
+            // dataGridView1.DataSource = context.Categories.ToList();
+        }
+
+
+// silmek için;
+private void button1_Click(object sender, EventArgs e)
+        {
+            var kat = context.Categories.Find(10);    // params tipinde object KeyValue yani PrimaryKey istiyor. Metod imzasına bak. PK üzerinden çalışıyor.
+            context.Categories.Remove(kat);
+            context.SaveChanges();
+        }
+
+
+// joinlemek için;
+NorthwindContext context = new NorthwindContext();
+private void button2_Click(object sender, EventArgs e)
+        {
+            
+            dataGridView1.DataSource = context.Products.Include("Category").Select(x => new { x.ProductId, x.ProductName, x.Category.CategoryName }).ToList();
+        }
+
+        
