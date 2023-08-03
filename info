@@ -122,4 +122,31 @@ private void button2_Click(object sender, EventArgs e)
             dataGridView1.DataSource = context.Products.Include("Category").Select(x => new { x.ProductId, x.ProductName, x.Category.CategoryName }).ToList();
         }
 
-        
+//---------------------------
+
+Hoca der ki;
+
+Aşağıdaki class EF tarafından otomatik oluşturulan class;
+Burada koleksiyon olduğunu ifade eden herhangi birşey olabilirken (Microsoft bu yüzden ICollection yazmış), 
+aşağıdaki ifadenin List ile yazılabileceği, illa List olmayabileceği, 
+ayrıca List leri her defasından constructorda initialize etmeye çalışıyorlarmış.
+One to many ilişkisi olduğundan bunu ICollection üzerinden de alabilir.
+
+Söz konusu ifade;
+public virtual ICollection<Product> Products { get; set; }
+
+
+public partial class Category
+    {
+        public Category()
+        {
+            Products = new HashSet<Product>();
+        }
+
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; } = null!;
+        public string? Description { get; set; }
+        public byte[]? Picture { get; set; }
+
+        public virtual ICollection<Product> Products { get; set; }
+    }
