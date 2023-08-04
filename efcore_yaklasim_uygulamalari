@@ -40,7 +40,7 @@ private void btnProducts_Click(object sender, EventArgs e)
         }
 
 
-// silmek için;
+// bulmak ve silmek için;
 private void button1_Click(object sender, EventArgs e)
         {
             var kat = context.Categories.Find(10);    // params tipinde object KeyValue yani PrimaryKey istiyor. Metod imzasına bak. PK üzerinden çalışıyor.
