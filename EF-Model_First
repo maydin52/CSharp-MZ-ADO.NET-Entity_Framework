@@ -1,1 +1,231 @@
+ORM Tools 
+
+EF başlangıç      2010
+bu iki connection string yazıları çok farklıydı. EF 1000 lerce kod yazıyordu. Sorumluluk yazılımdaydı.
+Uzun vadede güncelleme yapılmak istendiğinde ya da değişiklik yapılmak istendiğinde yönetilebilir değildi, zorluk yaşatıyordu.
+Örnek bir senaryo gösterdi derste. Detayı videoda. Dosya ebatı şişmemesi için sildi.
+Yaklaşımları;
+Database First (Hazır DB) => EF => Model Sınıfları ve Context Sınıfı olusturulur...
+Model First    (Hazır DB Yok)   => Modelleri ve Context sınıfını olustur => EF => DB yi olusturuyor...
+
+
+EF 4.0 core değil dikkat!!!   2013-2014            2025 desteğin kesileceği tarih
+Code first yaklaşımına geçildi.
+(Yazılım Firmalarını MS zorlaması sonucunda gelmiştir...)
+connection string eski yaygın bilinen formatına dönüştürülmüştür.
+Code First(uzun vadeli projeleri daha yonetilebilir hale getiriyor...) 
+Yüzlerce kod oluşturmuyor. Sorumluluk yazılımcıda. MS extra sınıf yazmıyor. Biz genellikle türetme, interface ve polymophism için override kullanıyoruz. Uzun vadeli projelerde daha yönetilebilir.
+Kendi içerisinde;
+       Database First
+       Model First
+
+LINQ to SQL Classes tan gelen bir alışkanlık. İki yöntem vardı; Model first Database first   -   2008
+
+Çift sürümler LTS 
+
+CORE 6
+  Model First    (CODE First)
+  Database First (CODE First)
+
+EF CORE diğer RDBS lerde de kullanılabiliyor. Bu çok güzel bir özellik. Yani VS ortamında birçok DB ile çalışılabiliyor, onların dilini öğrenmeye gerek kalmadan.
+Veritabanı programcılığı - ERM diagramları - araştır. ERM (Entity Relationship Model)
+
+Tablolar Entitydir.
+
+Javacılar genellikle HyberNate, nHyberNate
+
+MongoDB JSON olarak tutuyor. Dolayısıyla obje olarak tuttuğundan EF vb ORM tooluna ihtiyaç kalmıyor. JSON veriyor, JSON alıyor ama DB mantığı OOP.
+Literatürde OO veritabanları var ama büyükler RDBMS in kaymağını yiyene kadar geçmeye niyetli değil. (Oracle, DB2 (IBMin), Microsoft vs.)
+
+Elektrikli otomobiller 100 yıl önce de yapılmıştı ama yine gündeme geldi. Petrol lordları...
+
+1960 - ilişkisel veritabanı kavramının ortaya çıktığı tarih
+
+1998, 1999 - XML in çıkışı
+
+XML, CSV, JSON vb data sharing yani veriyi payklaşmak, veriyi taşımak amacıyla çıkarılıyor. 
+A ortamındaki veriyi B ortamına aktarmak istediğimizde yani. Ya da bir servis data gönderecekken kullanır. İki uygulamayı konuşturur.
+DB bütün olarak gönderemez. Tablo olarak gönderse karşı taraf tabloyu anlamaz. Ortak bir paylaşım formatı.
+
+//----------------
+
+  Model First kullanarak Database olusturma...
+
+  1-Oncelikle Nuget uzerinden gerekli kutuphaneleri indir...
+  2-Modelleri olustur... (Models klasörü içine)
+  POCO Classes(Plain Old CLR Object) .net i oluşturan sistemler. CLR çalıştıran - VSL kütüphane. CLR neyin ne zaman çalışıp sonlanacağına CLR karar verir.
+  Model: Veri tutamak amacıyla oılustrulan aynı zamanda veritabanında bir tablonun şemasını oluşturan sınıflara denir...
+  3-Context sınıfını olustur ve DbContext sınıfından turet. (Data klasörü içine)
+  4-DbSet<T> Her tabloya karşılık gelen prop. ları yaz...
+
+//----------------
+  
+  **** Mutlaka Her Modelde; N.S.A.; bir PK olması gerekir...
+   1- Bir property Id şeklide ise
+   2- [EntityName]ID şeklinde ise...
+   3- Attribute kullanarak...
+   4- Fluent API kullanarak...
+
+//----------------
+  
+  Navigation Properties
+  1-1    ModelA-ModelB !!
+  1-M    ModelA- ICollection<ModelB>
+  M-M    ICollection<ModelA> - ICollection<ModelB>
+
+//-----------------------------------------------------------------------------------------------------------------------
+
+
+// Hocaya içimden bir ses ArabaContext ve Araba class larının tek classta olabilme durumunu sorduğumda DTO ya geldiğimizde bahsederiz dedi. Hatırlat.
+// DTO (Data Transfer Object) : https://academy.patika.dev/courses/net-core/2-viewmodel-ve-dto-kavrami
+
+
+
+
+
+
+
+//Models Klasörü içerisinde;
+
+internal class Araba
+    {
+        public int ArabaID { get; set; }
+        //public string  Plaka { get; set; }
+        //public string Marka { get; set; }
+        public string Model { get; set; }
+        public int ModelYili { get; set; }
+        public double  Fiyat { get; set; }
+        public string Renk { get; set; }
+
+
+        public int MarkaID { get; set; }
+        //Nav. Prop.
+        public Marka Marka { get; set; }
+
+        //Nav prop...
+        //public ICollection<Musteri> Musteriler { get; set; }
+
+        public ICollection<ArabaMusteri> Musteriler { get; set; }
+
+        //Attribute
+        [ForeignKey("ArabaID")]
+        public Plaka Plaka { get; set; }
+    }
+
+//---------------
+
+//Models Klasörü içerisinde;
+
+internal class ArabaMusteri
+    {
+        public int ID { get; set; }
+
+        public int ArabaID { get; set; }
+        public int MusteriID { get; set; }
+
+        public Araba Araba { get; set; }
+        public Musteri Musteri { get; set; }
+    }
+
+//---------------
+
+//Models Klasörü içerisinde;
+
+internal class Marka
+    {
+        public int MarkaID { get; set; }
+        public  string MarkaAdi { get; set; }
+
+        //Nav. Prop.
+        public ICollection<Araba> Arabalar { get; set; }
+    }
+
+//---------------
+
+//Models Klasörü içerisinde;
+
+internal class Musteri
+    {
+        public int MusteriID { get; set; }
+        public string MusteriAdi { get; set; }
+
+        //Nav. prop...
+        //public ICollection<Araba> Arabalar { get; set; }
+
+
+        public ICollection<ArabaMusteri> Arabalar { get; set; }
+    }
+
+//---------------
+
+//Models Klasörü içerisinde;
+
+internal class Plaka
+    {
+        public int PlakaID { get; set; }
+        public string PlakaNo{ get; set; }
+
+        public Araba Araba { get; set; }
+    }
+
+//---------------
+
+//Data Klasörü içerisinde;
+
+// Tools-Nuget Package Manager-Mnage Nuget For Solution-Browse-Entity framework core arat. 
+Sırasıyla;
+1. Microsoft.EntityFrameworkCore version 6.0.20 install-
+2. Microsoft.EntityFrameworkCore.SqlServer version 6.0.20 install- eğer db oracle olsaydı onunla ilgili provider ı yüklemek gerekir.
+
+Solution windowda dependencies altında packages altında yüklenenler kontrol edilir.
+
+
+
+
+internal class ArabaContext:DbContext
+    {
+        public DbSet<Araba> Arabalar { get; set; }
+        public DbSet<Marka> Markalar { get; set; }
+        public DbSet<Musteri> Musteriler { get; set; }
+        public DbSet<ArabaMusteri> Araba_Musteri { get; set; }
+        public  DbSet<Plaka> Plakalar { get; set; }
+
+        // 
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer("Data source=.;Initial catalog=YZL3440_GaleriDB;integrated security=true");
+
+            base.OnConfiguring(optionsBuilder);
+        }
+    }
+
+//---------------
+
+public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        ArabaContext _context = new ArabaContext();
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            _context.Database.EnsureDeleted();
+            _context.Database.EnsureCreated();
+
+
+            //Arabalar tablosuna ekleme yapmak istersek...
+            //Araba araba = new Araba() { 
+            //  Marka="Ferrari", Model= "Enzo", Plaka="34 Fer 34", ModelYili=2010, Renk="Kırmızı", Fiyat=1750000  
+            //};
+            //_context.Arabalar.Add(araba);
+            //_context.SaveChanges();
+
+           // _context.Arabalar.Add(new Araba() {   });
+
+           
+        }
+    }
 
