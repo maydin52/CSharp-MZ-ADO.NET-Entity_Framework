@@ -55,34 +55,60 @@ DB bütün olarak gönderemez. Tablo olarak gönderse karşı taraf tabloyu anla
   2-Modelleri olustur... (Models klasörü içine)
   POCO Classes(Plain Old CLR Object) .net i oluşturan sistemler. CLR çalıştıran - VSL kütüphane. CLR neyin ne zaman çalışıp sonlanacağına CLR karar verir.
   Model: Veri tutamak amacıyla oılustrulan aynı zamanda veritabanında bir tablonun şemasını oluşturan sınıflara denir...
-  3-Context sınıfını olustur ve DbContext sınıfından turet. (Data klasörü içine)
+  3-Context sınıfını olustur ve DbContext sınıfından turet. (Data klasörü içine) Context database e karşılık geliyor.
   4-DbSet<T> Her tabloya karşılık gelen prop. ları yaz...
 
 //----------------
   
   **** Mutlaka Her Modelde; N.S.A.; bir PK olması gerekir...
-   1- Bir property Id şeklide ise
-   2- [EntityName]ID şeklinde ise...
+   1- Bir property Id şeklide ise... EF anlar. Tablo adı Ogrenciler. Buna göre PK adının ID olması lazım. 
+Sadece Id kullanmak sorgu yazarken sıkıntı yaşanmasına neden olabiliyor.Cleancode a aykırı.
+   2- [EntityName]ID şeklinde ise... EF anlar. Tablo adı Ogrenciler. Buna göre PK adının OgrencilerID olması lazım.
    3- Attribute kullanarak...
    4- Fluent API kullanarak...
 
 //----------------
   
   Navigation Properties
+
+  İlişkiler propertyler üzerinden verilir.
+  
   1-1    ModelA-ModelB !!
   1-M    ModelA- ICollection<ModelB>
-  M-M    ICollection<ModelA> - ICollection<ModelB>
+  M-M    ICollection<ModelA> - ICollection<ModelB> //Hoca bunu da çok tercih etmediğini söyledi. Dikkat!! ara tablo üzerinden bağlantı
+
+M-M ilişkilerle ilgili özel durum vardı : ara tablo. EF ara tabloyu kendisi DBye koydu ama Modele koymadı. ArabaMusteri. NŞA iki PK olmaz Bu tabloda Composite Key (birleşik anahtar) var. 
+SQL keys altından kontrol et, 1 PK 2 FK var.
+Modele koymadığı için _context dediğimizde çıkmadı. extra kod yazmamak için modelini de biz oluşturacağız.
+
 
 //-----------------------------------------------------------------------------------------------------------------------
-
 
 // Hocaya içimden bir ses ArabaContext ve Araba class larının tek classta olabilme durumunu sorduğumda DTO ya geldiğimizde bahsederiz dedi. Hatırlat.
 // DTO (Data Transfer Object) : https://academy.patika.dev/courses/net-core/2-viewmodel-ve-dto-kavrami
 
+//-----------------------------------------------------------------------------------------------------------------------
 
 
 
+UYGULAMA
 
+PK kullanmadığımız senaryolarda ki %2 yaklaşık, hasnokey kullanılır.
+Her tabloda PK olmayabilir, olmak zorunda da değil. Özellikle çok yoğun verinin geldiği durumlarda performansı arttırmak için bazı tablolarda PK bilerek kullanılmayabilir.
+Çünkü MSSQL size isteseniz de istemeseniz de PK oluşturduğumuzda arkada clustered index oluşturur.
+Indexlemenin de sistem kaynağı ve donanım yani alan olarak maliyeti var. 
+Indexlenmemiş sql sorguları geç gelir.
+
+
+//SQL içerisinde DB nin, tablonun, tablo içinde PK, alanlar ve veri tiplerinin oluştuğunu gördük fakat double float, string nvarchar max oluştu, Sonradan allow nulls ayarladık!!!
+//Tabloları birbirine bağladık. İlk Marka modelinden başlayarak yukarıdaki sıraya göre. Sonra ilk yazdığımız Marka prop yorum satırına aldık. Araba modeline MarkaID 
+prop eklemememize rağmen EF DB tabloda getirdi fakat böyle tercih etmiyoruz. Form loadda  _context.Arabalar.Add(new Araba() {   }); prop MarkaID gelmedi. 
+Arkayüzde otomatik alanı oluşturdu ama new içinde nav prop içinden ulaşabiliriz. Dolayısıyla Araba modeline public int MarkaID { get; set; } ekledik.
+Nav prop avantajlarından biri FK yı da otomatik oluşturuyor. SQL içinden Keys altından gördük.
+
+
+
+// Sql içinde DB altında new database diagramdan ilişkiyi şema olarak ta görebilirsin.
 
 
 //Models Klasörü içerisinde;
@@ -172,13 +198,27 @@ internal class Plaka
 
 //Data Klasörü içerisinde;
 
+1.
 // Tools-Nuget Package Manager-Mnage Nuget For Solution-Browse-Entity framework core arat. 
 Sırasıyla;
 1. Microsoft.EntityFrameworkCore version 6.0.20 install-
 2. Microsoft.EntityFrameworkCore.SqlServer version 6.0.20 install- eğer db oracle olsaydı onunla ilgili provider ı yüklemek gerekir.
-
 Solution windowda dependencies altında packages altında yüklenenler kontrol edilir.
 
+2.
+//ArabaContext sınıfına DbContext özellikleri aktarılır.
+//usingi gelmezse ekle.
+// c ve c++ ta using lerin kullanılmadığında silinmesi gerekir fakat C# ta soluk benizli ifade edilir ve silinmesi gerekemez. Kullanılmadıkça dll leri eklemez.
+//Fareyle DBContext üzerine gelip çıkan tooltipteki açıklamaları oku.
+
+3.
+//Her modelin aşağıdaki gibi dbsetini oluştur. Özel durumlar; yazmadığımız durumlar var mesela abstract ssınıflarda.
+SQL de tablonun adı Arabalar, sütunların ismi modeldeki propertyler.
+public DbSet<Araba> Arabalar { get; set; }
+
+4.
+//Alt kısımda database bağlantısı için override on yazdığımızda çıkan metodu seç ve connection stringi yaz.
+//Başka yöntemler de var.
 
 
 
@@ -202,6 +242,9 @@ internal class ArabaContext:DbContext
 
 //---------------
 
+//
+
+
 public partial class Form1 : Form
     {
         public Form1()
@@ -212,16 +255,27 @@ public partial class Form1 : Form
         ArabaContext _context = new ArabaContext();
         private void Form1_Load(object sender, EventArgs e)
         {
+            
+            // varsa sil
             _context.Database.EnsureDeleted();
+
+            // yoksa oluştur
             _context.Database.EnsureCreated();
 
+            //İlişkileri yazmadan çalıştırdık, hata verdi.
+            //EF her tabloda standart olarak bir PK istiyor.
 
-            //Arabalar tablosuna ekleme yapmak istersek...
+            //Dikkat!!! Tablo bağlanmadan önceki çalışma
+            //Arabalar tablosuna ekleme yapmak istersek...       SQL deki insert e karşılık geliyor. ArabaID kabul etmedi.
             //Araba araba = new Araba() { 
             //  Marka="Ferrari", Model= "Enzo", Plaka="34 Fer 34", ModelYili=2010, Renk="Kırmızı", Fiyat=1750000  
             //};
             //_context.Arabalar.Add(araba);
+
+            //Her operasyonda yapılması gerekir. SQL cümlelerine çevrilebilmesi için.
             //_context.SaveChanges();
+
+
 
            // _context.Arabalar.Add(new Araba() {   });
 
