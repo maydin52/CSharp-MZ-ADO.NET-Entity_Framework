@@ -158,12 +158,14 @@ public class Araba
         //public string  Plaka { get; set; }
         //public string Marka { get; set; }
         
-        [StringLength(100)] //Attribute kullanımı. Kırmızı yanarsa kütüphane yükle. Attribute lar sadece propertylere değil classlara da uygulanabilir ve dikkat!! StringLength aslında bir class. 
-       //Literatürde bu yöntem Attribute Oriented Programming olarak geçiyor.
-       // 20-30 tane data annotation var.
+        [StringLength(100)] //Attribute kullanımı. Kırmızı yanarsa kütüphane yükle. Attribute lar sadece propertylere değil classlara da uygulanabilir 
+        //ve dikkat!! StringLength aslında bir class. 
+        //Literatürde bu yöntem Attribute Oriented Programming olarak geçiyor.
+        // 20-30 tane data annotation var.
         [Column(TypeName ="varchar")]                    
         public string Model { get; set; }
 
+        //herhangi bir tipin yanına ? konulursa nullable olur veya bkz cfg class içinde; .IsRequired(); içine false. SQL de allow nulls tiklenecek.
         public int? ModelYili { get; set; }
 
         [Column(TypeName ="money")]
@@ -350,7 +352,9 @@ public class MarkaCFG : IEntityTypeConfiguration<Marka>
 
         {
             builder.Property(x => x.MarkaAdi)
-                                   .IsRequired(true) // içi boş bırakılırsa varsayılan true.
+                                   .IsRequired(true) // içi boş bırakılırsa varsayılan true. 
+                                                        Ayrıca imzada [] işaretleri içindeki parametre optinal ya da default parameters anlamına geliyordu. 
+                                                        Named parameters ile aynı zamanda öğrenmiştik.
                                    .HasColumnType("varchar")
                                    .HasMaxLength(30);
 
@@ -367,9 +371,22 @@ public class MarkaCFG : IEntityTypeConfiguration<Marka>
         }
     }
 
-//---------------
+//--------------- FORM UYGULAMA -----------------------------
 
-//
+
+// Ekrandaki textbox, combobox ve datagridview ları isimlendir.
+
+// Markayı Combobox tan seçtireceğiz. verdiği idye göre aratacağız.
+
+            //Oncelikle;
+            //kullanıcıdan tum verileri al...
+            //Plaka tablosuna plakayı kaydet, olusan ID' yi al Araba tablosuna aktar...
+            //Markalar tablosundan gelen secili Markanın MarkaID sini arabalar tablosundaki markaID ile eslestir...
+            //Sonra Araba tablosuna kaydet....
+
+//Arabalar tablosuna ekleme yapmak istersek... // Dikkat ArabaID plakadan gelecek ama formda disable gösterecek.
+
+//ArabaID plaka tablosundan geleceğinden önce plaka .......
 
 
 public partial class Form1 : Form
@@ -383,64 +400,38 @@ public partial class Form1 : Form
         private void Form1_Load(object sender, EventArgs e)
         {
             
+            //Formdan girilen verilerin uçmaması için devre dışı bıraktık. Katmanlı mimari konusunda migration anlatılacak.
             // varsa sil
-            _context.Database.EnsureDeleted();
-
-            // yoksa oluştur
-            _context.Database.EnsureCreated();
-
-            //İlişkileri yazmadan çalıştırdık, hata verdi.
-            //EF her tabloda standart olarak bir PK istiyor.
-
-            //Dikkat!!! Tablo bağlanmadan önceki çalışma
-            //Arabalar tablosuna ekleme yapmak istersek...       SQL deki insert e karşılık geliyor. ArabaID kabul etmedi.
-            //Araba araba = new Araba() { 
-            //  Marka="Ferrari", Model= "Enzo", Plaka="34 Fer 34", ModelYili=2010, Renk="Kırmızı", Fiyat=1750000  
-            //};
-            //_context.Arabalar.Add(araba);
-
-            //Her operasyonda yapılması gerekir. SQL cümlelerine çevrilebilmesi için.
-            //_context.SaveChanges();
-
-
-
-           // _context.Arabalar.Add(new Araba() {   });
-
-           
-        }
-    }
-
-//--------------- YUKARIDAKİYLE KARŞILAŞTIR VE SİL
-
-
-public partial class Form1 : Form
-    {
-        public Form1()
-        {
-            InitializeComponent();
-        }
-
-        ArabaContext _context = new ArabaContext();
-        private void Form1_Load(object sender, EventArgs e)
-        {
             //_context.Database.EnsureDeleted();
+            // yoksa oluştur
             //_context.Database.EnsureCreated();
 
 
+            // Boş formda yapılan ilk gün çalışmasında;
+
+            //İlişkileri yazmadan çalıştırdık, hata verdi.
+            //EF her tabloda standart olarak bir PK istiyor.
+            //Dikkat!!! Tablo bağlanmadan önceki çalışma
             //Arabalar tablosuna ekleme yapmak istersek...
+            //SQL deki insert e karşılık geliyor. ArabaID kabul etmedi.
             //Araba araba = new Araba() { 
             //  Marka="Ferrari", Model= "Enzo", Plaka="34 Fer 34", ModelYili=2010, Renk="Kırmızı", Fiyat=1750000  
             //};
             //_context.Arabalar.Add(araba);
+            //Her operasyonda yapılması gerekir. SQL cümlelerine çevrilebilmesi için.
             //_context.SaveChanges();
-
+            //veya
             // _context.Arabalar.Add(new Araba() {   });
+            //_context.SaveChanges();
 
 
             //Markalar tablosundaki tum verileri getir ComboBox'a aktar...
             cmbMarka.DataSource = _context.Markalar.ToList();
+
+            //Namespace ve sınıf isimleri geldi. Bunu çözmek için;
             cmbMarka.DisplayMember = "MarkaAdi";
             cmbMarka.ValueMember = "MarkaID";
+
 
 
             //Form Yüklenirken arabalar tablosundaki verileri grid'e yukle...
@@ -473,7 +464,7 @@ public partial class Form1 : Form
 
 
 
-       // Dikkat!!! Farklı bir metod yazım şekli.
+        // Dikkat!!! Farklı bir metod yazım şekli.
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -484,8 +475,6 @@ public partial class Form1 : Form
 
             fn();
         }
-
-
 
 
 
@@ -515,10 +504,14 @@ public partial class Form1 : Form
             //    Fiyat = double.Parse(txtFiyat.Text),
             //    Renk = txtRenk.Text
 
+            //_context.Arabalar.Add(araba);
+            //_context.SaveChanges();
             //};
             #endregion
 
-            #region 2_Yontem UoW(Unit Of Work)
+
+
+            #region 2_Yontem UoW(Unit Of Work) //EF bu paterni destekler. Nav prop üzerinden gerekli olan id yi kendisi atıyor.*****ÖNERİLEN YÖNTEM
             Plaka plaka = new Plaka()
             {
                 PlakaNo = txtPlaka.Text
@@ -530,6 +523,10 @@ public partial class Form1 : Form
             Araba araba = new Araba()
             {
                 //ArabaID = plaka.PlakaID,
+                //Plaka araba classı içindeki nav prop, plaka ise yukarıda kullanıcının girdiği instance
+                //Oraya Id nin gelebilmesi için PK nın oluşması gerekiyor. Plakayı önce Plakalar tablosunda kaydetmem lazım. Bunun için ilk yöntemde SaveChanges yaptık.
+                //Gitti Plakalar tablosuna kaydetti ve oradan Plaka Id yi aldı ArabaId sine atadı. Yani bunun için iki defa SaveChanges yaptı.
+                //Ne kadar değişiklik yaparsan yap; bu patern tek seferde Db ye gidip gereken değişiklikleri yapıyor. 
                 Plaka = plaka,
                 MarkaID = Convert.ToInt32(cmbMarka.SelectedValue),
                 Model = txtModel.Text,
@@ -537,8 +534,11 @@ public partial class Form1 : Form
                 Renk = txtRenk.Text,
                 ModelYili = int.Parse(txtModelYili.Text)
             };
-            #endregion
+
             _context.Arabalar.Add(araba);
             _context.SaveChanges();
+            #endregion
+
+
         }
     }
