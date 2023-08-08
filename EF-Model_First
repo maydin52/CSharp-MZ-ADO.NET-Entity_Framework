@@ -65,11 +65,11 @@ DB bütün olarak gönderemez. Tablo olarak gönderse karşı taraf tabloyu anla
 Sadece Id kullanmak sorgu yazarken sıkıntı yaşanmasına neden olabiliyor.Cleancode a aykırı.
    2- [EntityName]ID şeklinde ise... EF anlar. Tablo adı Ogrenciler. Buna göre PK adının OgrencilerID olması lazım.
    3- Attribute kullanarak...
-   4- Fluent API kullanarak...
+   4- Fluent API kullanarak... C#5 yada 6 ? yaklaşık 2-3 senelik bir konu // seni öne geçirecek bir konu. Her sene eleğin ölçüsü daralıyor.
 
 //----------------
   
-  Navigation Properties
+  Navigation Properties (Primary Key - Foreign Key)
 
   İlişkiler propertyler üzerinden verilir.
   
@@ -77,9 +77,42 @@ Sadece Id kullanmak sorgu yazarken sıkıntı yaşanmasına neden olabiliyor.Cle
   1-M    ModelA- ICollection<ModelB>
   M-M    ICollection<ModelA> - ICollection<ModelB> //Hoca bunu da çok tercih etmediğini söyledi. Dikkat!! ara tablo üzerinden bağlantı
 
+
 M-M ilişkilerle ilgili özel durum vardı : ara tablo. EF ara tabloyu kendisi DBye koydu ama Modele koymadı. ArabaMusteri. NŞA iki PK olmaz Bu tabloda Composite Key (birleşik anahtar) var. 
 SQL keys altından kontrol et, 1 PK 2 FK var.
 Modele koymadığı için _context dediğimizde çıkmadı. extra kod yazmamak için modelini de biz oluşturacağız.
+
+
+
+//Tabloların sutun tipleri, uzunlukları, kısıtlar nasıl olusturulur...
+  // ilişkiler, keyler...
+  1-Attribute kullanımı...
+  2-Dogrudan OnModelCreating() metodu içerisinde...
+  3-ITypeEntityConfiguration arayuzunu uygulamış olan Config sınıfı içerisinde (***)
+
+
+  //Veritabanında ilk deger ataması nasıl yapılır...
+  1- OnModelCreating() metodunda 
+      modelBuilder.Entity<T>().HasData() metodu ile...
+  2-ITypeEntityConfiguration arayuzunu uygulamış olan Config sınıfı içerisinde
+      buider.HasData() metodu ile ....
+
+
+UnitOfWork pattern: Tek bir SaveChanges() metyodu ile birden fazla veriyi guncelleme, ekleme, silme islemlerini yapmak icin kullanılır...
+
+
+Sistem Analizi diye bir konu var.
+
+
+Attribute konusunda da bir sıkıntı var; Modelde her propertye bir çok Attribute yazdıkça cleancode bozuluyor. 
+Bunu MS Fluent API olarak çözdü.
+Kod yazma maliyeti biraz artıyor ama bakımı (maintenance) kolay.
+Genellikle bir cfg sınıfı açılır ve model cnf bilgilerini oradan çeker.
+
+Cleancode yazabilmek çok önemli.
+Değişken isimleri, notasyonlar, okunabilirliği arttırmak için ne yapıyorsun, şiir gibi mi, şiir kitaplarındaki 2 satır yazıp boş bırakmak gibi.
+
+
 
 
 //-----------------------------------------------------------------------------------------------------------------------
@@ -100,77 +133,91 @@ Indexlemenin de sistem kaynağı ve donanım yani alan olarak maliyeti var.
 Indexlenmemiş sql sorguları geç gelir.
 
 
-//SQL içerisinde DB nin, tablonun, tablo içinde PK, alanlar ve veri tiplerinin oluştuğunu gördük fakat double float, string nvarchar max oluştu, Sonradan allow nulls ayarladık!!!
+//SQL içerisinde DB nin, tablonun, tablo içinde PK, alanlar ve veri tiplerinin oluştuğunu gördük fakat double float, string nvarchar max oluştu, 
+Bunları attribute kullanımıyla düzenledik ve sonradan allow nulls olabilecek şekilde ayarladık!!!
 //Tabloları birbirine bağladık. İlk Marka modelinden başlayarak yukarıdaki sıraya göre. Sonra ilk yazdığımız Marka prop yorum satırına aldık. Araba modeline MarkaID 
 prop eklemememize rağmen EF DB tabloda getirdi fakat böyle tercih etmiyoruz. Form loadda  _context.Arabalar.Add(new Araba() {   }); prop MarkaID gelmedi. 
 Arkayüzde otomatik alanı oluşturdu ama new içinde nav prop içinden ulaşabiliriz. Dolayısıyla Araba modeline public int MarkaID { get; set; } ekledik.
 Nav prop avantajlarından biri FK yı da otomatik oluşturuyor. SQL içinden Keys altından gördük.
 
 
-
 // Sql içinde DB altında new database diagramdan ilişkiyi şema olarak ta görebilirsin.
+
+// daha sonra tip değiikliğini üst seviyeye çıkarırsanız sıkıntı olmaz ama aşağı indirirseniz olma ihtimali var.
+
+// aile arabası isteyene ferrari vermemelisin.
 
 
 //Models Klasörü içerisinde;
 
-internal class Araba
+public class Araba
     {
         public int ArabaID { get; set; }
         //public string  Plaka { get; set; }
         //public string Marka { get; set; }
+        
+        [StringLength(100)] //Attribute kullanımı. Kırmızı yanarsa kütüphane yükle. Attribute lar sadece propertylere değil classlara da uygulanabilir ve dikkat!! StringLength aslında bir class. 
+       //Literatürde bu yöntem Attribute Oriented Programming olarak geçiyor.
+       // 20-30 tane data annotation var.
+        [Column(TypeName ="varchar")]                    
         public string Model { get; set; }
-        public int ModelYili { get; set; }
+
+        public int? ModelYili { get; set; }
+
+        [Column(TypeName ="money")]
         public double  Fiyat { get; set; }
+
+        [StringLength(20),Column(TypeName ="varchar")] // Arka arkaya Attribute kullanımı.
         public string Renk { get; set; }
 
 
         public int MarkaID { get; set; }
         //Nav. Prop.
-        public Marka Marka { get; set; }
+        public virtual Marka Marka { get; set; }
 
         //Nav prop...
         //public ICollection<Musteri> Musteriler { get; set; }
 
-        public ICollection<ArabaMusteri> Musteriler { get; set; }
+        public virtual ICollection<ArabaMusteri> Musteriler { get; set; }
 
-        //Attribute
+        //Attribute  dikkat [Key] yazılırsa primary key olur.
         [ForeignKey("ArabaID")]
-        public Plaka Plaka { get; set; }
+        public virtual Plaka Plaka { get; set; }
     }
 
 //---------------
 
 //Models Klasörü içerisinde;
 
-internal class ArabaMusteri
+public class ArabaMusteri
     {
         public int ID { get; set; }
 
         public int ArabaID { get; set; }
         public int MusteriID { get; set; }
 
-        public Araba Araba { get; set; }
-        public Musteri Musteri { get; set; }
+        public virtual Araba Araba { get; set; }
+        public virtual Musteri Musteri { get; set; }
     }
 
 //---------------
 
 //Models Klasörü içerisinde;
 
-internal class Marka
+public class Marka
     {
         public int MarkaID { get; set; }
         public  string MarkaAdi { get; set; }
 
         //Nav. Prop.
-        public ICollection<Araba> Arabalar { get; set; }
+        public virtual ICollection<Araba> Arabalar { get; set; }
     }
 
 //---------------
 
 //Models Klasörü içerisinde;
 
-internal class Musteri
+public class Musteri
     {
         public int MusteriID { get; set; }
         public string MusteriAdi { get; set; }
@@ -179,19 +226,18 @@ internal class Musteri
         //public ICollection<Araba> Arabalar { get; set; }
 
 
-        public ICollection<ArabaMusteri> Arabalar { get; set; }
+        public virtual ICollection<ArabaMusteri> Arabalar { get; set; }
     }
-
 //---------------
 
 //Models Klasörü içerisinde;
 
-internal class Plaka
+public class Plaka
     {
         public int PlakaID { get; set; }
         public string PlakaNo{ get; set; }
 
-        public Araba Araba { get; set; }
+        public virtual Araba Araba { get; set; }
     }
 
 //---------------
@@ -222,7 +268,7 @@ public DbSet<Araba> Arabalar { get; set; }
 
 
 
-internal class ArabaContext:DbContext
+public class ArabaContext:DbContext
     {
         public DbSet<Araba> Arabalar { get; set; }
         public DbSet<Marka> Markalar { get; set; }
@@ -230,13 +276,77 @@ internal class ArabaContext:DbContext
         public DbSet<ArabaMusteri> Araba_Musteri { get; set; }
         public  DbSet<Plaka> Plakalar { get; set; }
 
-        // 
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer("Data source=.;Initial catalog=YZL3440_GaleriDB;integrated security=true");
 
+            optionsBuilder.UseLazyLoadingProxies();
             base.OnConfiguring(optionsBuilder);
+        }
+
+
+       // DİKKAT : Fluent API.  
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            //Fluent API... 
+
+            //DİKKAT MusteriAdi için 1. YÖNTEM : ayrı class içinde değil ArabaContext içine 
+
+            modelBuilder.Entity<Musteri>().Property(x => x.MusteriAdi)
+                                          .HasMaxLength(50)
+                                          .HasColumnType("varchar")
+                                          .IsRequired();
+
+            modelBuilder.Entity<Musteri>().HasData(
+                 new Musteri {  MusteriID=1, MusteriAdi="Cevdet Dursun"},
+                 new Musteri {  MusteriID=2, MusteriAdi="Selami Atmaca"},
+                 new Musteri {  MusteriID=3, MusteriAdi="Dursun Durmasin"}
+                );
+
+
+            //Fluent API... 
+
+            //DİKKAT MarkaAdi için 2. YÖNTEM : ayrı class içinde **** TERCİH EDİLEN
+
+            //modelBuilder.ApplyConfiguration() çıkan tooltipteki overloadın yorumu : Generic Marka olacak 
+ve sonrasında öyle bir sınıf yaz ki IEntityTypeConfiguration interface ini implemente etmiş olsun (generic içine yazdığın modele dikkat)
+Configuration klasörü oluştur ve altına devam et.
+
+            //Herşeyi OnModelCreating içine koyarsam bu sefer burası yani ArabaContext:DbContext içi şişecekti.
+
+            modelBuilder.ApplyConfiguration<Marka>(new MarkaCFG());
+
+            base.OnModelCreating(modelBuilder);
+        }
+    }
+
+//---------------
+
+//Configuration Klasörü içerisinde;
+
+// Açıklama yukarıda... 2. Yöntem
+
+public class MarkaCFG : IEntityTypeConfiguration<Marka>
+    {
+        
+       // aşağıdaki metod implemente gelen metod. İçini revize ettik.
+
+       public void Configure(EntityTypeBuilder<Marka> builder)
+        {
+            builder.Property(x => x.MarkaAdi)
+                                   .IsRequired(true) // içi boş bırakılırsa varsayılan true.
+                                   .HasColumnType("varchar")
+                                   .HasMaxLength(30);
+
+            builder.HasData(
+                new Marka() { MarkaID=1, MarkaAdi="Ferrari" },
+                new Marka() { MarkaID=2, MarkaAdi="BMW" },
+                new Marka() { MarkaID=3, MarkaAdi="Mercedes" },
+                new Marka() { MarkaID=4, MarkaAdi="Audi" },
+                new Marka() { MarkaID=5, MarkaAdi="Renault" }
+                );
+           
         }
     }
 
@@ -283,3 +393,124 @@ public partial class Form1 : Form
         }
     }
 
+//--------------- YUKARIDAKİYLE KARŞILAŞTIR VE SİL
+
+
+public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        ArabaContext _context = new ArabaContext();
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            //_context.Database.EnsureDeleted();
+            //_context.Database.EnsureCreated();
+
+
+            //Arabalar tablosuna ekleme yapmak istersek...
+            //Araba araba = new Araba() { 
+            //  Marka="Ferrari", Model= "Enzo", Plaka="34 Fer 34", ModelYili=2010, Renk="Kırmızı", Fiyat=1750000  
+            //};
+            //_context.Arabalar.Add(araba);
+            //_context.SaveChanges();
+
+            // _context.Arabalar.Add(new Araba() {   });
+
+
+            //Markalar tablosundaki tum verileri getir ComboBox'a aktar...
+            cmbMarka.DataSource = _context.Markalar.ToList();
+            cmbMarka.DisplayMember = "MarkaAdi";
+            cmbMarka.ValueMember = "MarkaID";
+
+
+            //Form Yüklenirken arabalar tablosundaki verileri grid'e yukle...
+            // dataGridView1.DataSource = _context.Arabalar.ToList();
+
+            //var result = from a in _context.Arabalar
+            //             join p in _context.Plakalar
+            //             on a.ArabaID equals p.PlakaID
+            //             select new { a.Renk, a.MarkaID, p.PlakaID };
+
+            //Eager Loading JOIN islemi...
+            //var result = _context.Arabalar.Include(x => x.Marka).Include(x => x.Plaka).Select(x => new {x.Plaka.PlakaNo, x.Marka.MarkaAdi, x.Renk, x.Fiyat, x.Model, x.ModelYili  });
+
+            //SELECT * FROM ....
+            //var result = _context.Arabalar.Select(x => new { x.Plaka.PlakaNo, x.Marka.MarkaAdi, x.Renk, x.Fiyat, x.Model, x.ModelYili });
+
+            //rengi kırmızı olanlar gelsin
+
+            //var result = _context.Arabalar.Select(x => new { x.Plaka.PlakaNo, x.Marka.MarkaAdi, x.Renk, x.Fiyat, x.Model, x.ModelYili }).Where(x=>x.Renk =="Kirmizi");
+
+            //ıcınde k olanlar...
+
+            var result = _context.Arabalar.Select(x => new { x.Plaka.PlakaNo, x.Marka.MarkaAdi, x.Renk, x.Fiyat, x.Model, x.ModelYili }).Where(x => x.Renk.StartsWith("K")).OrderBy(x=>x.Fiyat).Take(1);
+
+
+            //var result = _context.Arabalar.Select(x => new { x.Plaka.PlakaNo, x.Marka.MarkaAdi, x.Renk, x.Fiyat, x.Model, x.ModelYili }).Where(x => x.Renk == "Kirmizi");
+
+            dataGridView1.DataSource = result.ToList();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var fn = () => MessageBox.Show("Merhaba Dunya");
+
+            fn();
+        }
+
+        private void btnKaydet_Click(object sender, EventArgs e)
+        {
+            //Oncelikle;
+            //kullanıcıdan tum verileri al...
+            //Plaka tablosuna plakayı kaydet, olusan ID' yi al Araba tablosuna aktar...
+            //Markalar tablosundan gelen secili Martkanın MarkaID sini
+            // arabalar tablosundaki markaID ile eslestir...
+            //Sonra Araba tablosuna kaydet....
+
+            #region 1_Yontem_Geleneksel
+            //Plaka plaka = new Plaka()
+            //{
+            //    PlakaNo = txtPlaka.Text
+            //};
+
+            //_context.Plakalar.Add(plaka);
+            //_context.SaveChanges();
+
+            //Araba araba = new Araba()
+            //{
+            //    ArabaID = plaka.PlakaID,
+            //    MarkaID = Convert.ToInt32(cmbMarka.SelectedValue),
+            //    Model = txtModel.Text,
+            //    Fiyat = double.Parse(txtFiyat.Text),
+            //    Renk = txtRenk.Text
+
+            //};
+            #endregion
+
+            #region 2_Yontem UoW(Unit Of Work)
+            Plaka plaka = new Plaka()
+            {
+                PlakaNo = txtPlaka.Text
+            };
+
+            _context.Plakalar.Add(plaka);
+
+
+            Araba araba = new Araba()
+            {
+                //ArabaID = plaka.PlakaID,
+                Plaka = plaka,
+                MarkaID = Convert.ToInt32(cmbMarka.SelectedValue),
+                Model = txtModel.Text,
+                Fiyat = double.Parse(txtFiyat.Text),
+                Renk = txtRenk.Text,
+                ModelYili = int.Parse(txtModelYili.Text)
+            };
+            #endregion
+            _context.Arabalar.Add(araba);
+            _context.SaveChanges();
+        }
+    }
