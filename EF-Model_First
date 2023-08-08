@@ -146,6 +146,8 @@ Nav prop avantajlarından biri FK yı da otomatik oluşturuyor. SQL içinden Key
 // daha sonra tip değiikliğini üst seviyeye çıkarırsanız sıkıntı olmaz ama aşağı indirirseniz olma ihtimali var.
 
 // aile arabası isteyene ferrari vermemelisin.
+// Herşey ameliyat etmeden de tedavi edilebilir. Hangi durumda kim kazanıyor? Sen ve devlet kaybetmemelisin? Elindeki seçenekleri bilmeden olmaz?
+
 
 
 //Models Klasörü içerisinde;
@@ -333,6 +335,16 @@ public class MarkaCFG : IEntityTypeConfiguration<Marka>
        // aşağıdaki metod implemente gelen metod. İçini revize ettik.
 
        public void Configure(EntityTypeBuilder<Marka> builder)
+
+       //Delege ve event kullanımlarında detaylandırılacak.
+       //Delege metod taşır. 
+       //(x => x) örneğin marka girerse marka çıkar gibi. ilk giren x in sonradan parçalarına ulaşabilmek için.
+       //Func yazınca yanında delegate yazdı ve mor çanta sembolü var. Metodun rengi de mor. Yani metod taşıyor.
+       //Action da Func gibi delegate
+
+       // -> thin arrow operatörü (c ve c++ ta pointer konularında geçiyor) , => fat arrow operatörü, ? elvis operatörü
+       // lambda ile metot da yazılabiliyor.
+
         {
             builder.Property(x => x.MarkaAdi)
                                    .IsRequired(true) // içi boş bırakılırsa varsayılan true.
@@ -454,12 +466,23 @@ public partial class Form1 : Form
             dataGridView1.DataSource = result.ToList();
         }
 
+
+
+       // Dikkat!!! Farklı bir metod yazım şekli.
+
         private void button1_Click(object sender, EventArgs e)
         {
-            var fn = () => MessageBox.Show("Merhaba Dunya");
+              // Anomim (yani isim yok, parametre yok, oladabilir, delege konularında anlatılacak.) metod (prop, const, deconst vs. bu şekilde yazılır. 
+       İlk girdiği yer Lambda exp. sonra dilin içinde kanser gibi yayıldı.
+              
+              var fn = () => MessageBox.Show("Merhaba Dunya");
 
             fn();
         }
+
+
+
+
 
         private void btnKaydet_Click(object sender, EventArgs e)
         {
