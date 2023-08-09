@@ -31,5 +31,46 @@ Configuration klasörü aç, her tablo için cfg sınıflarını ve üyelerini o
 
 7. Formu hazırla.
 
-8. Form özelliklerini, CRUD işlemlerini ortam bağımsızlığı, patternler (mesela UnitOfWork pattern), cleancode ve diğer kurallara dikkate alarak hazırla.
+8. Form özelliklerini, CRUD, DB vs işlemlerini ortam bağımsızlığı, patternler (mesela UnitOfWork pattern), cleancode ve diğer kurallara dikkate alarak hazırla.
+
+
+
+
+-Books
+BookID
+BookName
+AuthorID
+PublisherID
+NumberOfPages
+
+
+
+-Branchs
+BranchID
+BranchName
+
+-Authors
+AuthorID
+AuthorName
+
+
+-Publishers
+PublisherID
+PublisherName
+
+
+-Stocks
+StockID
+BranchID
+BookID
+Amount
+
+
+
+
+
+
+
+
+
 
