@@ -1,0 +1,35 @@
+ALGORİTMA
+
+1. Kullanıcı arayüzünü, tabloları, tablo alanlarını, tablo ilişkilerini belirle.
+
+2. Windows Form dosyası aç.
+
+3. Nugetten yüklenmesi gereken tüm paketleri aynı versiyon olacak şekilde yükle.
+Tools-Nuget Package Manager-Mnage Nuget For Solution-Browse-Entity framework core arat. Sırasıyla;
+1. Microsoft.EntityFrameworkCore version 6.0.20 install-
+2. Microsoft.EntityFrameworkCore.SqlServer version 6.0.20 install- eğer db oracle olsaydı onunla ilgili provider ı yüklemek gerekir.
+3. Microsoft.EntityFrameworkCore.Proxies
+Solution windowda dependencies altında packages altında yüklenenler kontrol edilir.
+
+4. Model sınıflarını ve üyelerini oluştur. 
+(Üyeleri; Property, uzunluk, kısıt, ilişkileri yani keyleri, ilşki olup olmama durumu)
+(Her bir üye için de kullanılabilecek yöntemleri; Modeller için attribute kullanarak, Configuration klasörü içinde her model için ayrı cfg sınıfı açıp 
+sonra Context sınıfı içinde OnModelCreating metoduna apply yapıp Fluent API kullanarak, 
+Context sınıfı içinde OnModelCreating metodunu override ederektümünü oraya yazarak)
+Configuration klasörü aç, her tablo için cfg sınıflarını ve üyelerini oluştur. (Tip, uzunluk, kısıt, iişki, key)
+
+5. Data klasörü aç, Context sınıfını ve üyelerini oluştur. 
+(DbContext ten miras alınması, her modelin DbSet inin tanımlanması, OnConfiguring metoduna UseSqlServer, UseLazyLoadingProxies, base.OnConfiguring(optionsBuilder); girişleri)
+
+6. SQL den database diagramı aç ve (Üyeleri; Property, uzunluk, kısıt, ilişkileri yani keyleri, ilşki olup olmama durumu) kontrol et.
+
+7. Veritabanına ilk değer atamalarını yap.
+  1- OnModelCreating() metodunda 
+      modelBuilder.Entity<T>().HasData() metodu ile...
+  2-ITypeEntityConfiguration arayuzunu uygulamış olan Config sınıfı içerisinde
+      buider.HasData() metodu ile ....
+
+7. Formu hazırla.
+
+8. Form özelliklerini, CRUD işlemlerini ortam bağımsızlığı, patternler (mesela UnitOfWork pattern), cleancode ve diğer kurallara dikkate alarak hazırla.
+
